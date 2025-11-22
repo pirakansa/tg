@@ -883,7 +883,7 @@
       DOM.hungerValue.textContent = hunger;
       DOM.energyValue.textContent = energy;
       DOM.moodValue.textContent = mood;
-      DOM.dirtValue.textContent = dirtiness;
+      DOM.dirtValue.textContent = Math.round(dirtiness);
       DOM.hungerBar.style.width = `${hunger}%`;
       DOM.energyBar.style.width = `${energy}%`;
       DOM.moodBar.style.width = `${mood}%`;
