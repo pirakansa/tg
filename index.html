@@ -470,6 +470,11 @@
       sick: false,
     };
 
+    const PASSIVE_INTERVAL_MS = 5000;
+    const BASE_DECAY = 8;
+    const SICK_DECAY = 12;
+    const DIRTINESS_GAIN = 6;
+
     const DOM = {
       hungerValue: document.getElementById("hungerValue"),
       energyValue: document.getElementById("energyValue"),
@@ -544,9 +549,11 @@
     }
 
     function applyPassiveDecay() {
-      const decay = state.sick ? 2 : 1;
-      adjustStats({ hunger: -decay, energy: -1, mood: -1 });
-      state.dirtiness = clamp(state.dirtiness + 0.8);
+      const decay = state.sick ? SICK_DECAY : BASE_DECAY;
+      const energyDecay = Math.max(6, decay - 2);
+      const moodDecay = Math.max(6, decay - 2);
+      adjustStats({ hunger: -decay, energy: -energyDecay, mood: -moodDecay });
+      state.dirtiness = clamp(state.dirtiness + DIRTINESS_GAIN);
 
       if (state.dirtiness > 70 && Math.random() < 0.08) {
         state.sick = true;
@@ -621,7 +628,7 @@
     buttons.med.addEventListener("click", actionMedicine);
     buttons.reset.addEventListener("click", resetGame);
 
-    let ticker = setInterval(applyPassiveDecay, 3500);
+    let ticker = setInterval(applyPassiveDecay, PASSIVE_INTERVAL_MS);
     updateUI();
     log("ようこそ！今日もいっしょにあそぼう。", "good");
 
