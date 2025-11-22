@@ -470,6 +470,10 @@
       sick: false,
     };
 
+    const DECAY_INTERVAL_MS = 2000;
+    const MAX_TRANSITION_INTERVAL_MS = 60000;
+    let lastTransitionAt = performance.now();
+
     const DOM = {
       hungerValue: document.getElementById("hungerValue"),
       energyValue: document.getElementById("energyValue"),
@@ -535,6 +539,7 @@
       state.energy = clamp(state.energy + energy);
       state.mood = clamp(state.mood + mood);
       state.dirtiness = clamp(state.dirtiness + dirtiness);
+      lastTransitionAt = performance.now();
       updateUI();
     }
 
@@ -557,6 +562,13 @@
         log("元気がなくなってしまった！はやくケアしよう", "bad");
       }
       updateUI();
+    }
+
+    function ensureTransitionCadence() {
+      const now = performance.now();
+      if (now - lastTransitionAt >= MAX_TRANSITION_INTERVAL_MS) {
+        applyPassiveDecay();
+      }
     }
 
     function actionFeed() {
@@ -621,7 +633,11 @@
     buttons.med.addEventListener("click", actionMedicine);
     buttons.reset.addEventListener("click", resetGame);
 
-    let ticker = setInterval(applyPassiveDecay, 2000);
+    let ticker = setInterval(applyPassiveDecay, DECAY_INTERVAL_MS);
+    let cadenceGuard = setInterval(ensureTransitionCadence, Math.min(10000, MAX_TRANSITION_INTERVAL_MS));
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) ensureTransitionCadence();
+    });
     updateUI();
     log("ようこそ！今日もいっしょにあそぼう。", "good");
 
