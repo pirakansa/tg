@@ -317,6 +317,34 @@
       opacity: 1;
     }
 
+    .pet.evo-emerald {
+      background: linear-gradient(145deg, #e1ffef 0%, #6fd38b 100%);
+      border-color: rgba(87, 209, 114, 0.5);
+      box-shadow: 0 22px 56px rgba(111, 211, 139, 0.35);
+    }
+
+    .pet.evo-emerald .pet-face {
+      background: radial-gradient(circle at 50% 45%, #e2ffe5 22%, transparent 25%),
+        linear-gradient(145deg, #f8fff8 0%, #d5f7de 100%);
+      border-color: rgba(87, 209, 114, 0.35);
+    }
+
+    .pet.evo-emerald .ornament-sparkles { opacity: 0.45; filter: hue-rotate(35deg) saturate(1.1); }
+
+    .pet.evo-azure {
+      background: linear-gradient(145deg, #e4f4ff 0%, #6eb8ff 100%);
+      border-color: rgba(110, 184, 255, 0.45);
+      box-shadow: 0 24px 60px rgba(110, 184, 255, 0.35);
+    }
+
+    .pet.evo-azure .pet-face {
+      background: radial-gradient(circle at 50% 45%, #def0ff 22%, transparent 25%),
+        linear-gradient(145deg, #f6fbff 0%, #dfeeff 100%);
+      border-color: rgba(110, 184, 255, 0.35);
+    }
+
+    .pet.evo-azure .ornament-sparkles { opacity: 0.4; filter: hue-rotate(-45deg); }
+
     .pet.evo-mini { --scale: 0.82; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22); }
     .pet.evo-colossus { --scale: 1.18; box-shadow: 0 26px 62px rgba(0, 0, 0, 0.38); }
 
@@ -331,6 +359,32 @@
         radial-gradient(circle at 45% 38%, #fff4df 18%, transparent 20%),
         linear-gradient(145deg, #fffaf3 0%, #ffedf8 100%);
       border-color: rgba(255, 209, 102, 0.35);
+    }
+
+    .pet.evo-triangle {
+      clip-path: polygon(50% 0%, 8% 88%, 92% 88%);
+      border-radius: 24px;
+      background: linear-gradient(160deg, #fff3d9 0%, #ffb347 100%);
+      border-color: rgba(255, 164, 87, 0.55);
+      box-shadow: 0 24px 58px rgba(255, 164, 87, 0.35);
+    }
+
+    .pet.evo-triangle .pet-face {
+      background: linear-gradient(145deg, #fffaf2 0%, #ffe3c7 100%);
+      border-color: rgba(255, 186, 113, 0.45);
+    }
+
+    .pet.evo-square {
+      border-radius: 22px;
+      background: linear-gradient(145deg, #f0f4ff 0%, #c9d3ff 100%);
+      border-color: rgba(142, 159, 255, 0.5);
+      box-shadow: 0 24px 56px rgba(142, 159, 255, 0.35);
+    }
+
+    .pet.evo-square .pet-face {
+      border-radius: 22px;
+      background: linear-gradient(145deg, #ffffff 0%, #e8edff 100%);
+      border-color: rgba(142, 159, 255, 0.4);
     }
 
     .pet::after {
@@ -775,6 +829,18 @@
         condition: () => state.dirtiness > 65 || state.sick,
       },
       {
+        name: "emerald",
+        className: "evo-emerald",
+        message: "森のちからで翠色になった！リラックスしているみたい",
+        condition: () => state.energy > 70 && state.hunger > 50 && state.dirtiness < 45 && !state.sick,
+      },
+      {
+        name: "azure",
+        className: "evo-azure",
+        message: "さわやかな青色に進化！空を泳いでいる気分",
+        condition: () => state.mood > 70 && state.energy > 50 && state.dirtiness < 60,
+      },
+      {
         name: "mini",
         className: "evo-mini",
         message: "お腹ペコペコで小さくしぼんじゃった…",
@@ -785,6 +851,18 @@
         className: "evo-colossus",
         message: "元気いっぱい！大きく成長して頼もしいね",
         condition: () => state.hunger > 80 && state.energy > 80 && state.mood > 60,
+      },
+      {
+        name: "triangle",
+        className: "evo-triangle",
+        message: "シャキーン！三角フォルムに変身！",
+        condition: () => state.energy < 55 && state.mood > 40 && state.dirtiness < 70,
+      },
+      {
+        name: "square",
+        className: "evo-square",
+        message: "安定感のある四角ボディになったよ",
+        condition: () => state.hunger > 40 && state.energy > 40 && state.mood < 55,
       },
       {
         name: "aurora",
