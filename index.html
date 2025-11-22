@@ -474,9 +474,15 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       display: grid;
       gap: 12px;
+      grid-template-areas:
+        "title"
+        "buttons"
+        "log";
+      grid-template-columns: 1fr;
     }
 
     .actions h2 {
+      grid-area: title;
       margin: 0;
       font-size: 16px;
       letter-spacing: 0.03em;
@@ -484,6 +490,7 @@
     }
 
     .action-grid {
+      grid-area: buttons;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 10px;
@@ -518,21 +525,26 @@
     }
 
     .log {
+      grid-area: log;
       background: rgba(0, 0, 0, 0.2);
       border-radius: 12px;
       padding: 12px;
-      max-height: 180px;
+      max-height: clamp(140px, 32vh, 220px);
       overflow: auto;
       font-size: 14px;
       border: 1px solid rgba(255, 255, 255, 0.06);
       line-height: 1.6;
+      word-break: break-word;
+      overflow-wrap: anywhere;
     }
 
     .log-entry {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 8px;
       color: var(--muted);
+      word-break: break-word;
+      overflow-wrap: anywhere;
     }
 
     .log-entry strong {
@@ -555,6 +567,61 @@
     @keyframes sway {
       0%, 100% { transform: rotate(-1deg); }
       50% { transform: rotate(2deg); }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 14px;
+        align-items: flex-start;
+      }
+
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .status-row {
+        margin-top: 10px;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(160px, 1fr);
+        overflow-x: auto;
+        padding-bottom: 6px;
+        gap: 10px;
+        scroll-snap-type: x proximity;
+        scrollbar-width: thin;
+      }
+
+      .status-card {
+        scroll-snap-align: start;
+        min-width: 0;
+      }
+
+      .actions {
+        grid-template-areas:
+          "title"
+          "buttons"
+          "log";
+      }
+
+      .log {
+        font-size: 13px;
+        max-height: 160px;
+        padding: 10px;
+      }
+    }
+
+    @media (min-width: 721px) {
+      .actions {
+        grid-template-columns: 1.1fr 0.9fr;
+        grid-template-areas:
+          "title title"
+          "buttons log";
+        align-items: start;
+      }
+
+      .log {
+        max-height: 230px;
+      }
     }
 
     @keyframes head-bob {
