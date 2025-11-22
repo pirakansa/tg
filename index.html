@@ -61,8 +61,15 @@
       gap: 8px;
     }
 
-    .status-row {
+    .status-stack {
+      flex: 1;
       margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .status-row {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
@@ -787,22 +794,26 @@
   <div class="container">
     <header>
       <h1>たまごっち風 ミニペット</h1>
-      <div class="status-row" style="flex: 1">
-        <div class="status-card">
-          <div class="status-title"><span>満腹度</span><span class="status-value" id="hungerValue">100</span></div>
-          <div class="progress"><span id="hungerBar" style="width:100%"></span></div>
+      <div class="status-stack">
+        <div class="status-row">
+          <div class="status-card">
+            <div class="status-title"><span>満足度</span><span class="status-value" id="hungerValue">100</span></div>
+            <div class="progress"><span id="hungerBar" style="width:100%"></span></div>
+          </div>
+          <div class="status-card">
+            <div class="status-title"><span>元気</span><span class="status-value" id="energyValue">100</span></div>
+            <div class="progress"><span id="energyBar" style="width:100%"></span></div>
+          </div>
         </div>
-        <div class="status-card">
-          <div class="status-title"><span>元気</span><span class="status-value" id="energyValue">100</span></div>
-          <div class="progress"><span id="energyBar" style="width:100%"></span></div>
-        </div>
-        <div class="status-card">
-          <div class="status-title"><span>ごきげん</span><span class="status-value" id="moodValue">100</span></div>
-          <div class="progress"><span id="moodBar" style="width:100%"></span></div>
-        </div>
-        <div class="status-card">
-          <div class="status-title"><span>汚れ</span><span class="status-value" id="dirtValue">0</span></div>
-          <div class="progress"><span id="dirtBar" style="width:0%"></span></div>
+        <div class="status-row">
+          <div class="status-card">
+            <div class="status-title"><span>ごきげん</span><span class="status-value" id="moodValue">100</span></div>
+            <div class="progress"><span id="moodBar" style="width:100%"></span></div>
+          </div>
+          <div class="status-card">
+            <div class="status-title"><span>汚れ</span><span class="status-value" id="dirtValue">0</span></div>
+            <div class="progress"><span id="dirtBar" style="width:0%"></span></div>
+          </div>
         </div>
       </div>
     </header>
