@@ -133,6 +133,47 @@
       min-height: 280px;
     }
 
+    .pet-alerts {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      gap: 8px;
+      z-index: 2;
+    }
+
+    .pet-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-weight: 700;
+      font-size: 13px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .pet-badge.bad { color: var(--danger); }
+    .pet-badge.ok { color: var(--accent-2); }
+
+    .poop-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .poop {
+      position: absolute;
+      bottom: 8px;
+      font-size: 26px;
+      filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.35));
+      animation: wiggle 2.4s ease-in-out infinite;
+      opacity: 0.95;
+    }
+
     .grid-overlay {
       position: absolute;
       inset: 0;
@@ -181,6 +222,15 @@
 
     .pet.is-happy .pet-face {
       animation: head-bob 2.6s ease-in-out infinite;
+    }
+
+    .pet.is-sick {
+      box-shadow: 0 18px 38px rgba(255, 107, 107, 0.35);
+      filter: hue-rotate(-25deg) saturate(0.9);
+    }
+
+    .pet.is-sick .pet-face {
+      animation: sway 1.4s ease-in-out infinite;
     }
 
     .pet.wiggle {
@@ -426,12 +476,18 @@
           <div class="status-title"><span>ごきげん</span><span class="status-value" id="moodValue">100</span></div>
           <div class="progress"><span id="moodBar" style="width:100%"></span></div>
         </div>
+        <div class="status-card">
+          <div class="status-title"><span>汚れ</span><span class="status-value" id="dirtValue">0</span></div>
+          <div class="progress"><span id="dirtBar" style="width:0%"></span></div>
+        </div>
       </div>
     </header>
 
-    <div class="pet-area">
+      <div class="pet-area">
       <div class="pet-scene">
         <div class="grid-overlay"></div>
+        <div class="pet-alerts" id="petAlerts"></div>
+        <div class="poop-container" id="poopContainer"></div>
         <div class="pet" id="pet">
           <div class="pet-face">
             <div class="eye left"></div>
@@ -468,6 +524,7 @@
       mood: 100,
       dirtiness: 0,
       sick: false,
+      poops: 0,
     };
 
     const DECAY_INTERVAL_MS = 2000;
@@ -478,12 +535,16 @@
       hungerValue: document.getElementById("hungerValue"),
       energyValue: document.getElementById("energyValue"),
       moodValue: document.getElementById("moodValue"),
+      dirtValue: document.getElementById("dirtValue"),
       hungerBar: document.getElementById("hungerBar"),
       energyBar: document.getElementById("energyBar"),
       moodBar: document.getElementById("moodBar"),
+      dirtBar: document.getElementById("dirtBar"),
       log: document.getElementById("log"),
       pet: document.getElementById("pet"),
       floating: document.getElementById("floatingStatus"),
+      alerts: document.getElementById("petAlerts"),
+      poops: document.getElementById("poopContainer"),
     };
 
     const buttons = {
@@ -500,28 +561,79 @@
     }
 
     function updateUI() {
-      const { hunger, energy, mood } = state;
+      const { hunger, energy, mood, dirtiness } = state;
       DOM.hungerValue.textContent = hunger;
       DOM.energyValue.textContent = energy;
       DOM.moodValue.textContent = mood;
+      DOM.dirtValue.textContent = dirtiness;
       DOM.hungerBar.style.width = `${hunger}%`;
       DOM.energyBar.style.width = `${energy}%`;
       DOM.moodBar.style.width = `${mood}%`;
+      DOM.dirtBar.style.width = `${dirtiness}%`;
 
       DOM.hungerBar.style.background = hunger < 30 ? `linear-gradient(90deg, var(--danger), #f8a5a5)` : "";
       DOM.energyBar.style.background = energy < 30 ? `linear-gradient(90deg, var(--danger), #f8a5a5)` : "";
       DOM.moodBar.style.background = mood < 30 ? `linear-gradient(90deg, var(--danger), #f8a5a5)` : "";
+      DOM.dirtBar.style.background = dirtiness > 70 ? `linear-gradient(90deg, var(--danger), #f8a5a5)` : "";
 
       const overall = (hunger + energy + mood) / 3;
-      if (overall > 80) {
+      if (state.sick) {
+        DOM.floating.textContent = "🤒 ぐったり… おくすりが必要かも";
+      } else if (dirtiness > 80) {
+        DOM.floating.textContent = "💩 画面が汚れてきた！きれいにしよう";
+      } else if (overall > 80) {
         DOM.floating.textContent = "☀️ すごくごきげん！";
-        DOM.pet.classList.add("is-happy");
       } else if (overall > 45) {
         DOM.floating.textContent = "🙂 のんびり過ごし中";
-        DOM.pet.classList.remove("is-happy");
       } else {
-        DOM.floating.textContent = state.sick ? "🤒 ぐったり..." : "🥺 かまって...";
-        DOM.pet.classList.remove("is-happy");
+        DOM.floating.textContent = "🥺 さみしいみたい…";
+      }
+
+      DOM.pet.classList.toggle("is-happy", overall > 80 && !state.sick);
+      DOM.pet.classList.toggle("is-sick", state.sick);
+
+      renderAlerts();
+      renderPoops();
+    }
+
+    function renderAlerts() {
+      DOM.alerts.innerHTML = "";
+      const alerts = [];
+      if (state.sick) alerts.push({ icon: "🤢", label: "びょうき", type: "bad" });
+      if (state.dirtiness > 60 || state.poops > 0) {
+        const pile = Math.max(state.poops, Math.ceil(state.dirtiness / 40));
+        alerts.push({ icon: "💩", label: `うんち x${pile}`, type: "bad" });
+      } else if (state.dirtiness > 30) {
+        alerts.push({ icon: "🧹", label: "そろそろおそうじ", type: "ok" });
+      }
+
+      if (alerts.length === 0) {
+        const badge = document.createElement("div");
+        badge.className = "pet-badge ok";
+        badge.textContent = "🟢 げんき";
+        DOM.alerts.appendChild(badge);
+        return;
+      }
+
+      alerts.forEach(({ icon, label, type }) => {
+        const badge = document.createElement("div");
+        badge.className = `pet-badge ${type}`;
+        badge.textContent = `${icon} ${label}`;
+        DOM.alerts.appendChild(badge);
+      });
+    }
+
+    function renderPoops() {
+      DOM.poops.innerHTML = "";
+      const count = Math.min(5, Math.max(state.poops, Math.floor(state.dirtiness / 35)));
+      for (let i = 0; i < count; i++) {
+        const poop = document.createElement("span");
+        poop.className = "poop";
+        poop.textContent = "💩";
+        const offset = 10 + i * (80 / Math.max(1, count - 1)) + (Math.random() * 6 - 3);
+        poop.style.left = `${Math.min(92, Math.max(5, offset))}%`;
+        poop.style.animationDelay = `${Math.random().toFixed(2)}s`;
+        DOM.poops.appendChild(poop);
       }
     }
 
@@ -550,8 +662,12 @@
 
     function applyPassiveDecay() {
       const decay = state.sick ? 2 : 1;
-      adjustStats({ hunger: -decay, energy: -1, mood: -1 });
-      state.dirtiness = clamp(state.dirtiness + 0.8);
+      adjustStats({ hunger: -decay, energy: -1, mood: -1, dirtiness: +0.8 });
+
+      if (state.dirtiness > 35 && Math.random() < 0.25) {
+        state.poops = Math.min(5, state.poops + 1);
+        log("うんちをしてしまった…掃除が必要だよ", "bad");
+      }
 
       if (state.dirtiness > 70 && Math.random() < 0.08) {
         state.sick = true;
@@ -572,8 +688,7 @@
     }
 
     function actionFeed() {
-      adjustStats({ hunger: +22, mood: +6 });
-      state.dirtiness = clamp(state.dirtiness + 8);
+      adjustStats({ hunger: +22, mood: +6, dirtiness: +8 });
       log("おにぎりを食べて満腹！", "good");
       animatePet();
     }
@@ -589,8 +704,7 @@
     }
 
     function actionRest() {
-      adjustStats({ energy: +28, hunger: -6 });
-      state.dirtiness = clamp(state.dirtiness + 2);
+      adjustStats({ energy: +28, hunger: -6, dirtiness: +2 });
       log("ぐっすり寝て回復！", "good");
       animatePet();
     }
@@ -598,6 +712,7 @@
     function actionClean() {
       state.dirtiness = 0;
       state.sick = false;
+      state.poops = 0;
       adjustStats({ mood: +10 });
       log("シャワーでさっぱり！", "good");
       animatePet();
@@ -620,6 +735,7 @@
       state.mood = 100;
       state.dirtiness = 0;
       state.sick = false;
+      state.poops = 0;
       updateUI();
       log("リセットしました。お世話を始めよう！");
       animatePet();
