@@ -63,29 +63,10 @@
 
     .status-row {
       margin-top: 16px;
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
-      overflow-x: auto;
       padding: 4px 2px 8px;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-      scroll-snap-type: x proximity;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-x: contain;
-      touch-action: pan-x;
-    }
-
-    .status-row::-webkit-scrollbar {
-      height: 8px;
-    }
-
-    .status-row::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    .status-row::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 999px;
     }
 
     .status-card {
@@ -714,6 +695,7 @@
         margin: 12px -4px 0;
         padding: 2px 4px 10px;
         gap: 10px;
+        grid-template-columns: 1fr;
       }
 
       .status-card {
