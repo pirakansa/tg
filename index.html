@@ -146,7 +146,6 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      transform: translate(-50%, -50%);
       width: 180px;
       height: 180px;
       border-radius: 50%;
@@ -156,11 +155,36 @@
       display: grid;
       place-items: center;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+      --scale: 1;
+      transform: translate(-50%, -50%) scale(var(--scale));
+      animation: float 3.2s ease-in-out infinite;
+    }
+
+    .pet::after {
+      content: "";
+      position: absolute;
+      inset: auto 20px 12px;
+      height: 10px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 0, 0, 0.35), transparent 60%);
+      filter: blur(4px);
+      opacity: 0.8;
+      transform: translate(-50%, 0) scale(1.05);
+      animation: shadow-pulse 3.2s ease-in-out infinite;
+      z-index: 0;
     }
 
     .pet.is-happy {
-      transform: translate(-50%, -50%) scale(1.03);
+      --scale: 1.03;
       box-shadow: 0 25px 55px rgba(255, 209, 102, 0.35);
+    }
+
+    .pet.is-happy .pet-face {
+      animation: head-bob 2.6s ease-in-out infinite;
+    }
+
+    .pet.wiggle {
+      animation: float 3.2s ease-in-out infinite, wiggle 0.8s ease-in-out 2;
     }
 
     .pet-face {
@@ -172,6 +196,8 @@
       border-radius: 50%;
       position: relative;
       border: 3px solid rgba(0, 0, 0, 0.05);
+      animation: sway 4.2s ease-in-out infinite;
+      z-index: 1;
     }
 
     .eye {
@@ -198,6 +224,43 @@
 
     .eye.left { left: 38%; }
     .eye.right { right: 38%; }
+
+    .cheek {
+      position: absolute;
+      width: 28px;
+      height: 18px;
+      background: radial-gradient(circle at 50% 50%, rgba(255, 153, 153, 0.9), rgba(255, 153, 153, 0.25));
+      border-radius: 50%;
+      bottom: 30%;
+      opacity: 0.9;
+      animation: blush 3.4s ease-in-out infinite;
+      filter: blur(0.2px);
+    }
+
+    .cheek.left { left: 26%; }
+    .cheek.right { right: 26%; }
+
+    .pet-hand {
+      position: absolute;
+      width: 36px;
+      height: 30px;
+      background: #f7f1e5;
+      border-radius: 50%;
+      bottom: -4px;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1);
+      animation: wave 5s ease-in-out infinite;
+      transform-origin: 50% 10%;
+    }
+
+    .pet-hand.left {
+      left: 16%;
+      animation-delay: 0.4s;
+    }
+
+    .pet-hand.right {
+      right: 16%;
+      animation-delay: 1s;
+    }
 
     .mouth {
       position: absolute;
@@ -302,6 +365,43 @@
       95% { transform: translateY(-50%) scaleY(0.15); }
     }
 
+    @keyframes float {
+      0%, 100% { transform: translate(-50%, -48%) scale(var(--scale)); }
+      50% { transform: translate(-50%, -52%) scale(var(--scale)); }
+    }
+
+    @keyframes sway {
+      0%, 100% { transform: rotate(-1deg); }
+      50% { transform: rotate(2deg); }
+    }
+
+    @keyframes head-bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    @keyframes blush {
+      0%, 100% { opacity: 0.75; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes wave {
+      0%, 100% { transform: rotate(-4deg); }
+      50% { transform: rotate(9deg); }
+    }
+
+    @keyframes shadow-pulse {
+      0%, 100% { transform: translate(-50%, 0) scale(1.05); opacity: 0.8; }
+      50% { transform: translate(-50%, 0) scale(1.15); opacity: 0.65; }
+    }
+
+    @keyframes wiggle {
+      0%, 100% { transform: translate(-50%, -50%) scale(var(--scale)) rotate(0deg); }
+      25% { transform: translate(calc(-50% - 2px), -48%) scale(var(--scale)) rotate(-4deg); }
+      50% { transform: translate(calc(-50% + 2px), -52%) scale(var(--scale)) rotate(4deg); }
+      75% { transform: translate(calc(-50% - 1px), -49%) scale(var(--scale)) rotate(-3deg); }
+    }
+
     @media (max-width: 800px) {
       body { padding: 16px; }
       .pet-area { grid-template-columns: 1fr; }
@@ -337,6 +437,10 @@
             <div class="eye left"></div>
             <div class="eye right"></div>
             <div class="mouth"></div>
+            <div class="cheek left"></div>
+            <div class="cheek right"></div>
+            <div class="pet-hand left"></div>
+            <div class="pet-hand right"></div>
           </div>
         </div>
         <div class="floating" id="floatingStatus">☀️ あそぼう！</div>
@@ -434,6 +538,11 @@
       updateUI();
     }
 
+    function animatePet(feedback = "wiggle", duration = 900) {
+      DOM.pet.classList.add(feedback);
+      setTimeout(() => DOM.pet.classList.remove(feedback), duration);
+    }
+
     function applyPassiveDecay() {
       const decay = state.sick ? 2 : 1;
       adjustStats({ hunger: -decay, energy: -1, mood: -1 });
@@ -454,6 +563,7 @@
       adjustStats({ hunger: +22, mood: +6 });
       state.dirtiness = clamp(state.dirtiness + 8);
       log("おにぎりを食べて満腹！", "good");
+      animatePet();
     }
 
     function actionPlay() {
@@ -463,12 +573,14 @@
       }
       adjustStats({ mood: +18, energy: -12, hunger: -4 });
       log("ボール遊びでごきげん！", "good");
+      animatePet();
     }
 
     function actionRest() {
       adjustStats({ energy: +28, hunger: -6 });
       state.dirtiness = clamp(state.dirtiness + 2);
       log("ぐっすり寝て回復！", "good");
+      animatePet();
     }
 
     function actionClean() {
@@ -476,6 +588,7 @@
       state.sick = false;
       adjustStats({ mood: +10 });
       log("シャワーでさっぱり！", "good");
+      animatePet();
     }
 
     function actionMedicine() {
@@ -486,6 +599,7 @@
       state.sick = false;
       adjustStats({ energy: +10, mood: +6 });
       log("おくすりで体調が良くなった！", "good");
+      animatePet();
     }
 
     function resetGame() {
@@ -496,6 +610,7 @@
       state.sick = false;
       updateUI();
       log("リセットしました。お世話を始めよう！");
+      animatePet();
     }
 
     Object.values(buttons).forEach(btn => btn.addEventListener("click", () => btn.blur()));
