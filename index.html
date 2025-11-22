@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>たまごっち風ミニゲーム</title>
+  <style>
+    :root {
+      --bg: #0b1b31;
+      --card: #112545;
+      --panel: #19345c;
+      --accent: #ffd166;
+      --accent-2: #5ef0c1;
+      --danger: #ff6b6b;
+      --text: #f6f7fb;
+      --muted: #c6d1e3;
+      --grid: rgba(255, 255, 255, 0.07);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 20% 20%, rgba(255, 209, 102, 0.08), transparent 30%),
+        radial-gradient(circle at 80% 0%, rgba(94, 240, 193, 0.08), transparent 25%),
+        var(--bg);
+      color: var(--text);
+      font-family: "Inter", "Noto Sans JP", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .container {
+      width: min(960px, 100%);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+      padding: 24px;
+      backdrop-filter: blur(10px);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 28px);
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-row {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .status-card {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px;
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .status-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 209, 102, 0.08), rgba(94, 240, 193, 0.05));
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .status-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .progress {
+      height: 10px;
+      width: 100%;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      transition: width 0.25s ease, background 0.25s ease;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    .status-value {
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .pet-area {
+      margin: 26px 0;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 18px;
+    }
+
+    .pet-scene {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+      min-height: 280px;
+    }
+
+    .grid-overlay {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(to right, var(--grid) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+    }
+
+    .pet {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #fefefe 0%, #d6e2ff 100%);
+      border: 6px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+      display: grid;
+      place-items: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .pet.is-happy {
+      transform: translate(-50%, -50%) scale(1.03);
+      box-shadow: 0 25px 55px rgba(255, 209, 102, 0.35);
+    }
+
+    .pet-face {
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle at 45% 35%, #ffedc2 18%, transparent 19%),
+        radial-gradient(circle at 55% 35%, #ffedc2 18%, transparent 19%),
+        #fff7e9;
+      border-radius: 50%;
+      position: relative;
+      border: 3px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .eye {
+      position: absolute;
+      width: 16px;
+      height: 20px;
+      border-radius: 8px;
+      background: #0f1b2d;
+      top: 48%;
+      transform: translateY(-50%);
+      animation: blink 6s infinite;
+    }
+
+    .eye::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 4px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+    }
+
+    .eye.left { left: 38%; }
+    .eye.right { right: 38%; }
+
+    .mouth {
+      position: absolute;
+      width: 36px;
+      height: 22px;
+      border: 3px solid #0f1b2d;
+      border-color: #0f1b2d transparent transparent transparent;
+      border-radius: 50% 50% 45% 45% / 80% 80% 15% 15%;
+      bottom: 32%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .floating {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      display: flex;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+
+    .actions {
+      background: var(--panel);
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: grid;
+      gap: 12px;
+    }
+
+    .actions h2 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+    }
+
+    button {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.3s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .secondary {
+      color: var(--muted);
+      border-style: dashed;
+    }
+
+    .log {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      padding: 12px;
+      max-height: 180px;
+      overflow: auto;
+      font-size: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      line-height: 1.6;
+    }
+
+    .log-entry {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+    }
+
+    .log-entry strong {
+      color: var(--text);
+    }
+
+    .bad { color: var(--danger); }
+    .good { color: var(--accent-2); }
+
+    @keyframes blink {
+      0%, 92%, 100% { transform: translateY(-50%) scaleY(1); }
+      95% { transform: translateY(-50%) scaleY(0.15); }
+    }
+
+    @media (max-width: 800px) {
+      body { padding: 16px; }
+      .pet-area { grid-template-columns: 1fr; }
+      .pet { width: 160px; height: 160px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>たまごっち風 ミニペット</h1>
+      <div class="status-row" style="flex: 1">
+        <div class="status-card">
+          <div class="status-title"><span>満腹度</span><span class="status-value" id="hungerValue">100</span></div>
+          <div class="progress"><span id="hungerBar" style="width:100%"></span></div>
+        </div>
+        <div class="status-card">
+          <div class="status-title"><span>元気</span><span class="status-value" id="energyValue">100</span></div>
+          <div class="progress"><span id="energyBar" style="width:100%"></span></div>
+        </div>
+        <div class="status-card">
+          <div class="status-title"><span>ごきげん</span><span class="status-value" id="moodValue">100</span></div>
+          <div class="progress"><span id="moodBar" style="width:100%"></span></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="pet-area">
+      <div class="pet-scene">
+        <div class="grid-overlay"></div>
+        <div class="pet" id="pet">
+          <div class="pet-face">
+            <div class="eye left"></div>
+            <div class="eye right"></div>
+            <div class="mouth"></div>
+          </div>
+        </div>
+        <div class="floating" id="floatingStatus">☀️ あそぼう！</div>
+      </div>
+
+      <div class="actions">
+        <h2>お世話アクション</h2>
+        <div class="action-grid">
+          <button id="feedBtn">🍙 ごはん</button>
+          <button id="playBtn">🎲 あそぶ</button>
+          <button id="restBtn">🌙 おやすみ</button>
+          <button id="cleanBtn">🫧 シャワー</button>
+          <button id="medBtn" class="secondary">💊 おくすり</button>
+          <button id="resetBtn" class="secondary">🔄 リセット</button>
+        </div>
+        <div class="log" id="log"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      hunger: 100,
+      energy: 100,
+      mood: 100,
+      dirtiness: 0,
+      sick: false,
+    };
+
+    const DOM = {
+      hungerValue: document.getElementById("hungerValue"),
+      energyValue: document.getElementById("energyValue"),
+      moodValue: document.getElementById("moodValue"),
+      hungerBar: document.getElementById("hungerBar"),
+      energyBar: document.getElementById("energyBar"),
+      moodBar: document.getElementById("moodBar"),
+      log: document.getElementById("log"),
+      pet: document.getElementById("pet"),
+      floating: document.getElementById("floatingStatus"),
+    };
+
+    const buttons = {
+      feed: document.getElementById("feedBtn"),
+      play: document.getElementById("playBtn"),
+      rest: document.getElementById("restBtn"),
+      clean: document.getElementById("cleanBtn"),
+      med: document.getElementById("medBtn"),
+      reset: document.getElementById("resetBtn"),
+    };
+
+    function clamp(value) {
+      return Math.max(0, Math.min(100, value));
+    }
+
+    function updateUI() {
+      const { hunger, energy, mood } = state;
+      DOM.hungerValue.textContent = hunger;
+      DOM.energyValue.textContent = energy;
+      DOM.moodValue.textContent = mood;
+      DOM.hungerBar.style.width = `${hunger}%`;
+      DOM.energyBar.style.width = `${energy}%`;
+      DOM.moodBar.style.width = `${mood}%`;
+
+      DOM.hungerBar.style.background = hunger < 30 ? `linear-gradient(90deg, var(--danger), #f8a5a5)` : "";
+      DOM.energyBar.style.background = energy < 30 ? `linear-gradient(90deg, var(--danger), #f8a5a5)` : "";
+      DOM.moodBar.style.background = mood < 30 ? `linear-gradient(90deg, var(--danger), #f8a5a5)` : "";
+
+      const overall = (hunger + energy + mood) / 3;
+      if (overall > 80) {
+        DOM.floating.textContent = "☀️ すごくごきげん！";
+        DOM.pet.classList.add("is-happy");
+      } else if (overall > 45) {
+        DOM.floating.textContent = "🙂 のんびり過ごし中";
+        DOM.pet.classList.remove("is-happy");
+      } else {
+        DOM.floating.textContent = state.sick ? "🤒 ぐったり..." : "🥺 かまって...";
+        DOM.pet.classList.remove("is-happy");
+      }
+    }
+
+    function log(message, type = "") {
+      const entry = document.createElement("div");
+      entry.className = `log-entry ${type}`.trim();
+      const time = new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+      entry.innerHTML = `<strong>${time}</strong> ${message}`;
+      DOM.log.prepend(entry);
+      while (DOM.log.childNodes.length > 12) DOM.log.removeChild(DOM.log.lastChild);
+    }
+
+    function adjustStats({ hunger = 0, energy = 0, mood = 0, dirtiness = 0 }) {
+      state.hunger = clamp(state.hunger + hunger);
+      state.energy = clamp(state.energy + energy);
+      state.mood = clamp(state.mood + mood);
+      state.dirtiness = clamp(state.dirtiness + dirtiness);
+      updateUI();
+    }
+
+    function applyPassiveDecay() {
+      const decay = state.sick ? 2 : 1;
+      adjustStats({ hunger: -decay, energy: -1, mood: -1 });
+      state.dirtiness = clamp(state.dirtiness + 0.8);
+
+      if (state.dirtiness > 70 && Math.random() < 0.08) {
+        state.sick = true;
+        log("汚れすぎて風邪をひいたみたい…", "bad");
+      }
+
+      if (state.hunger === 0 || state.energy === 0 || state.mood === 0) {
+        log("元気がなくなってしまった！はやくケアしよう", "bad");
+      }
+      updateUI();
+    }
+
+    function actionFeed() {
+      adjustStats({ hunger: +22, mood: +6 });
+      state.dirtiness = clamp(state.dirtiness + 8);
+      log("おにぎりを食べて満腹！", "good");
+    }
+
+    function actionPlay() {
+      if (state.energy < 20) {
+        log("疲れて遊べないみたい…休ませてあげよう", "bad");
+        return;
+      }
+      adjustStats({ mood: +18, energy: -12, hunger: -4 });
+      log("ボール遊びでごきげん！", "good");
+    }
+
+    function actionRest() {
+      adjustStats({ energy: +28, hunger: -6 });
+      state.dirtiness = clamp(state.dirtiness + 2);
+      log("ぐっすり寝て回復！", "good");
+    }
+
+    function actionClean() {
+      state.dirtiness = 0;
+      state.sick = false;
+      adjustStats({ mood: +10 });
+      log("シャワーでさっぱり！", "good");
+    }
+
+    function actionMedicine() {
+      if (!state.sick) {
+        log("いまは元気。おくすりは不要だよ", "");
+        return;
+      }
+      state.sick = false;
+      adjustStats({ energy: +10, mood: +6 });
+      log("おくすりで体調が良くなった！", "good");
+    }
+
+    function resetGame() {
+      state.hunger = 100;
+      state.energy = 100;
+      state.mood = 100;
+      state.dirtiness = 0;
+      state.sick = false;
+      updateUI();
+      log("リセットしました。お世話を始めよう！");
+    }
+
+    Object.values(buttons).forEach(btn => btn.addEventListener("click", () => btn.blur()));
+    buttons.feed.addEventListener("click", actionFeed);
+    buttons.play.addEventListener("click", actionPlay);
+    buttons.rest.addEventListener("click", actionRest);
+    buttons.clean.addEventListener("click", actionClean);
+    buttons.med.addEventListener("click", actionMedicine);
+    buttons.reset.addEventListener("click", resetGame);
+
+    let ticker = setInterval(applyPassiveDecay, 3500);
+    updateUI();
+    log("ようこそ！今日もいっしょにあそぼう。", "good");
+
+    // キーボードショートカット
+    window.addEventListener("keydown", (e) => {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+      const keyMap = {
+        f: actionFeed,
+        p: actionPlay,
+        r: actionRest,
+        c: actionClean,
+        m: actionMedicine,
+        x: resetGame,
+      };
+      const fn = keyMap[e.key.toLowerCase()];
+      if (fn) fn();
+    });
+  </script>
+</body>
+</html>
