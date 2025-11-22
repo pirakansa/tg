@@ -63,9 +63,29 @@
 
     .status-row {
       margin-top: 16px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      display: flex;
       gap: 12px;
+      overflow-x: auto;
+      padding: 4px 2px 8px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      touch-action: pan-x;
+    }
+
+    .status-row::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .status-row::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .status-row::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
     }
 
     .status-card {
@@ -75,6 +95,9 @@
       border-radius: 14px;
       position: relative;
       overflow: hidden;
+      min-width: 180px;
+      flex: 0 0 180px;
+      scroll-snap-align: start;
     }
 
     .status-card::before {
@@ -633,10 +656,6 @@
         align-items: flex-start;
       }
 
-      .status-row {
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      }
-
       .pet-area {
         grid-template-columns: 1fr;
         gap: 14px;
@@ -669,6 +688,74 @@
         font-size: 13px;
         max-height: 160px;
         padding: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        padding: 14px;
+        border-radius: 16px;
+        width: 100%;
+      }
+
+      header {
+        gap: 8px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      .status-row {
+        margin: 12px -4px 0;
+        padding: 2px 4px 10px;
+        gap: 10px;
+      }
+
+      .status-card {
+        min-width: 150px;
+        flex-basis: 150px;
+        padding: 12px;
+      }
+
+      .status-title {
+        font-size: 13px;
+      }
+
+      .status-value {
+        font-size: 17px;
+      }
+
+      .pet-area {
+        margin: 14px 0;
+        gap: 12px;
+      }
+
+      .pet-scene {
+        min-height: 210px;
+        padding: 14px;
+      }
+
+      .pet {
+        width: 136px;
+        height: 136px;
+      }
+
+      .actions {
+        padding: 12px;
+        gap: 8px;
+      }
+
+      .action-grid {
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      }
+
+      .log {
+        max-height: 140px;
       }
     }
 
