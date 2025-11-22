@@ -201,6 +201,138 @@
       animation: float 3.2s ease-in-out infinite;
     }
 
+    .pet-ornament {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 2;
+    }
+
+    .ornament-horns {
+      top: -8px;
+      left: 50%;
+      width: 120px;
+      height: 52px;
+      transform: translateX(-50%);
+    }
+
+    .ornament-horns::before,
+    .ornament-horns::after {
+      content: "";
+      position: absolute;
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(180deg, #ffbeb3, #b5171e);
+      clip-path: polygon(50% 0, 0 100%, 100% 100%);
+      border-radius: 7px 7px 4px 4px;
+      filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.35));
+    }
+
+    .ornament-horns::before {
+      left: 18px;
+      transform: rotate(-12deg);
+    }
+
+    .ornament-horns::after {
+      right: 18px;
+      transform: rotate(12deg);
+    }
+
+    .ornament-halo {
+      width: 120px;
+      height: 30px;
+      border: 5px solid rgba(255, 237, 175, 0.9);
+      border-radius: 999px;
+      top: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 0 12px rgba(255, 237, 175, 0.75), 0 0 28px rgba(255, 209, 102, 0.35);
+      background: radial-gradient(circle, rgba(255, 246, 214, 0.7), transparent 65%);
+    }
+
+    .ornament-wings {
+      width: 240px;
+      height: 90px;
+      top: 54px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 0;
+    }
+
+    .ornament-wings::before,
+    .ornament-wings::after {
+      content: "";
+      width: 94px;
+      height: 74px;
+      background: radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.95), rgba(190, 220, 255, 0.75));
+      border-radius: 60% 40% 60% 40%;
+      box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.6), 0 10px 22px rgba(0, 0, 0, 0.16);
+    }
+
+    .ornament-wings::before { transform: rotate(-8deg) translateX(8px); }
+    .ornament-wings::after { transform: rotate(8deg) translateX(-8px); }
+
+    .ornament-sparkles {
+      inset: 12px;
+      position: absolute;
+      background: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.5) 0 12%, transparent 22%),
+        radial-gradient(circle at 70% 20%, rgba(255, 255, 255, 0.35) 0 10%, transparent 20%),
+        radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.4) 0 11%, transparent 21%);
+      filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6));
+      z-index: 1;
+    }
+
+    .pet.evo-crimson {
+      background: linear-gradient(145deg, #ff7a7a 0%, #ff2f2f 100%);
+      border-color: rgba(255, 87, 87, 0.6);
+      box-shadow: 0 22px 52px rgba(255, 78, 78, 0.35);
+    }
+
+    .pet.evo-crimson .pet-face {
+      background: linear-gradient(145deg, #ffe2e2 0%, #ffc2c2 100%);
+      border-color: rgba(255, 121, 121, 0.55);
+    }
+
+    .pet.evo-crimson .ornament-horns { opacity: 1; }
+    .pet.evo-crimson .ornament-sparkles { opacity: 0.25; filter: hue-rotate(-15deg); }
+
+    .pet.evo-angel {
+      background: linear-gradient(145deg, #fafffd 0%, #ddf6ff 100%);
+      border-color: rgba(94, 240, 193, 0.45);
+      box-shadow: 0 24px 58px rgba(94, 240, 193, 0.3);
+    }
+
+    .pet.evo-angel .pet-face {
+      background: linear-gradient(145deg, #ffffff 0%, #eaf8ff 100%);
+      border-color: rgba(94, 240, 193, 0.35);
+    }
+
+    .pet.evo-angel .ornament-halo,
+    .pet.evo-angel .ornament-wings,
+    .pet.evo-angel .ornament-sparkles {
+      opacity: 1;
+    }
+
+    .pet.evo-mini { --scale: 0.82; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22); }
+    .pet.evo-colossus { --scale: 1.18; box-shadow: 0 26px 62px rgba(0, 0, 0, 0.38); }
+
+    .pet.evo-aurora {
+      background: linear-gradient(145deg, #d8ecff 0%, #ffe8f5 100%);
+      border-color: rgba(255, 209, 102, 0.4);
+      box-shadow: 0 22px 56px rgba(255, 209, 102, 0.25);
+    }
+
+    .pet.evo-aurora .pet-face {
+      background: radial-gradient(circle at 55% 45%, #fff4df 18%, transparent 20%),
+        radial-gradient(circle at 45% 38%, #fff4df 18%, transparent 20%),
+        linear-gradient(145deg, #fffaf3 0%, #ffedf8 100%);
+      border-color: rgba(255, 209, 102, 0.35);
+    }
+
     .pet::after {
       content: "";
       position: absolute;
@@ -489,6 +621,10 @@
         <div class="pet-alerts" id="petAlerts"></div>
         <div class="poop-container" id="poopContainer"></div>
         <div class="pet" id="pet">
+          <div class="pet-ornament ornament-horns"></div>
+          <div class="pet-ornament ornament-halo"></div>
+          <div class="pet-ornament ornament-wings"></div>
+          <div class="pet-ornament ornament-sparkles"></div>
           <div class="pet-face">
             <div class="eye left"></div>
             <div class="eye right"></div>
@@ -529,7 +665,9 @@
 
     const DECAY_INTERVAL_MS = 2000;
     const MAX_TRANSITION_INTERVAL_MS = 60000;
+    const EVOLUTION_INTERVAL_MS = 5 * 60 * 1000;
     let lastTransitionAt = performance.now();
+    let currentEvolution = "";
 
     const DOM = {
       hungerValue: document.getElementById("hungerValue"),
@@ -555,6 +693,39 @@
       med: document.getElementById("medBtn"),
       reset: document.getElementById("resetBtn"),
     };
+
+    const EVOLUTIONS = [
+      {
+        name: "angel",
+        className: "evo-angel",
+        message: "ごきげんで天使のよう！キラキラに進化したよ",
+        condition: () => state.mood > 85 && state.hunger > 60 && state.energy > 60 && state.dirtiness < 25 && !state.sick,
+      },
+      {
+        name: "crimson",
+        className: "evo-crimson",
+        message: "荒ぶって真っ赤！角が生えて迫力アップ",
+        condition: () => state.dirtiness > 65 || state.sick,
+      },
+      {
+        name: "mini",
+        className: "evo-mini",
+        message: "お腹ペコペコで小さくしぼんじゃった…",
+        condition: () => state.hunger < 35 || state.energy < 35,
+      },
+      {
+        name: "colossus",
+        className: "evo-colossus",
+        message: "元気いっぱい！大きく成長して頼もしいね",
+        condition: () => state.hunger > 80 && state.energy > 80 && state.mood > 60,
+      },
+      {
+        name: "aurora",
+        className: "evo-aurora",
+        message: "ふしぎなオーラをまとって新しい姿に変身！",
+        condition: () => true,
+      },
+    ];
 
     function clamp(value) {
       return Math.max(0, Math.min(100, value));
@@ -655,6 +826,27 @@
       updateUI();
     }
 
+    function applyEvolution(evolution, { force = false } = {}) {
+      const classNames = EVOLUTIONS.map(e => e.className);
+      DOM.pet.classList.remove(...classNames);
+      DOM.pet.classList.add(evolution.className);
+
+      if (force || evolution.name !== currentEvolution) {
+        log(evolution.message, "good");
+        animatePet("wiggle", 1100);
+      }
+
+      currentEvolution = evolution.name;
+    }
+
+    function evaluateEvolution(force = false) {
+      const candidates = EVOLUTIONS.filter(evo => evo.condition());
+      const pool = candidates.length ? candidates : [EVOLUTIONS[EVOLUTIONS.length - 1]];
+      const next = pool[Math.floor(Math.random() * pool.length)];
+      if (!force && next.name === currentEvolution) return;
+      applyEvolution(next, { force });
+    }
+
     function animatePet(feedback = "wiggle", duration = 900) {
       DOM.pet.classList.add(feedback);
       setTimeout(() => DOM.pet.classList.remove(feedback), duration);
@@ -751,10 +943,12 @@
 
     let ticker = setInterval(applyPassiveDecay, DECAY_INTERVAL_MS);
     let cadenceGuard = setInterval(ensureTransitionCadence, Math.min(10000, MAX_TRANSITION_INTERVAL_MS));
+    let evolutionTimer = setInterval(() => evaluateEvolution(), EVOLUTION_INTERVAL_MS);
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) ensureTransitionCadence();
     });
     updateUI();
+    evaluateEvolution(true);
     log("ようこそ！今日もいっしょにあそぼう。", "good");
 
     // キーボードショートカット
